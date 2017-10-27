@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -15,7 +16,8 @@ namespace AspNetCore.OpenLayerDemo
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+          
+            services.AddMvc().AddRazorPagesOptions((o) => o.RootDirectory = "/src");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -25,6 +27,21 @@ namespace AspNetCore.OpenLayerDemo
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.Use(async (ctx, next) =>
+            {
+
+                if (Path.GetExtension(ctx.Request.Path) == ".ts" || Path.GetExtension(ctx.Request.Path) == ".tsx")
+                {
+
+                    await ctx.Response.WriteAsync(File.ReadAllText(ctx.Request.Path.Value.Substring(1)));
+                }
+                else
+                {
+                    await next();
+                }
+
+            });
 
             app.UseStaticFiles();
             app.UseMvc();

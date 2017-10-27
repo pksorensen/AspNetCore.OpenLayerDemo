@@ -19,6 +19,7 @@ namespace AspNetCore.OpenLayerDemo
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .UseWebRoot("artifacts/app")
                 .UseStartup<Startup>()
                 .Build();
     }
