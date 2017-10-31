@@ -5,7 +5,6 @@
   "devDependencies": {
     "@types/knockout": "latest",
     "@types/nprogress": "latest",
-    "@types/requirejs": "latest",
     "@types/openlayers": "latest",
     "grunt": "1.0.1",
     "grunt-contrib-copy": "1.0.0",
@@ -29,7 +28,14 @@
     "open-sans-fontface": "1.4.0",
     "flexboxgrid": "6.3.1",
     "ol-cesium": "1.31.0",
-    "proj4": "2.4.4"
+    "proj4": "2.4.4",
+    "es6-promise": "4.1.1"
+  },
+  "dependencies": {
+    "@types/phantom": "latest",
+    "@types/node": "latest",
+    "@types/q": "latest",
+    "@types/websocket": "latest"
   },
   "scripts": {
     "tsc": "node_modules/.bin/tsc"

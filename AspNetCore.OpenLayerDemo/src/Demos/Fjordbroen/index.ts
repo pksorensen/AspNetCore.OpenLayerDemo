@@ -7,6 +7,7 @@ import * as templateId from "template!./templates/rootlayout.html";
 import * as ol from "openlayers";
 
 
+
 let bridge = {
     "type": "FeatureCollection",
     "features": [
@@ -240,4 +241,129 @@ export class RootLayout extends KoLayout {
 
 
 
-ko.applyBindings(new RootLayout());
+
+
+function getParameterByName(name, url?) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+let tasks: { [key: string]: Deferred } = {};
+
+function generateUUID(): string {
+    return ([1e7] as any + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    )
+}
+
+
+class Deferred {
+
+    resolve;
+    reject;
+    promise = new Promise((resolve, reject) => { this.resolve = resolve; this.reject = reject });
+}
+
+
+function sendWebSocketEvent(connection: WebSocket, type: string, data: any) {
+    let id = generateUUID();
+
+    let task = {
+        id: id,
+        type: type,
+        data: data,
+
+    };
+    let msg = JSON.stringify(task);
+    if (msg.length > 65535) {
+        console.log("Msg to large");
+        let partId = 0;
+        msg = JSON.stringify(data);
+
+        while (msg.length > 0) {
+            let lng = Math.min(msg.length, 48000);
+            let b = JSON.stringify({
+                id,
+                type,
+                partId,
+                part: msg.substr(0, lng),
+                last: msg.length === lng
+            });
+            console.log("sending " + b.length);
+            connection.send(b);
+            msg = msg.substr(lng);
+        }
+
+
+    } else {
+        connection.send(msg);
+    }
+
+    tasks[id] = new Deferred();
+    return tasks[id].promise;
+}
+async function  main(config, connection) {
+
+    console.log("main called");
+    ko.applyBindings(new RootLayout());
+
+    setTimeout(async () => {
+
+        await sendWebSocketEvent(connection, "PAGE_RENDER", {path:"test.jpg"});
+        await sendWebSocketEvent(connection, "COMPLETE", { hello: "world" });
+
+    }, 10000);
+}
+
+
+if (getParameterByName("headless")) {
+
+    console.log("Running In Headless");
+     
+    let connection = new WebSocket('ws://127.0.0.1:1337');
+
+    connection.onopen = function () {
+        // connection is opened and ready to use
+        console.log("Connection Opened");
+
+        define("main", ["module", "es6-promise"], (module, es6promise) => { console.log(Object.keys(es6promise).join(" ")); es6promise.polyfill(); main(module.config(), connection); });
+      
+        requirejs.config({
+            paths: {
+                "es6-promise": "/libs/es6-promise/es6-promise.min"
+            }
+        });
+
+        connection.send(JSON.stringify({
+            type: "LOADED",
+            dependencies: { "es6-promise": "es6-promise/dist" }
+        }));
+    };
+
+    connection.onerror = function (error) {
+        console.log("FAILED TO OPEN SOCKET");
+        // an error occurred when sending/receiving data
+    };
+
+    connection.onmessage = function (message) {
+        // try to decode json (I assume that each message from server is json)
+        try {
+            var json = JSON.parse(message.data);
+            if (json.id in tasks) {
+                tasks[json.id].resolve(json.data);
+            }
+        } catch (e) {
+            console.log('This doesn\'t look like a valid JSON: ', message.data);
+            return;
+        }
+        // handle incoming message
+    };
+} else {
+    //RUNNING IN NORMAL BROWSER
+    ko.applyBindings(new RootLayout());
+}

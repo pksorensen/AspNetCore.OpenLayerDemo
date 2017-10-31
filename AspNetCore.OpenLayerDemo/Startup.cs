@@ -43,6 +43,18 @@ namespace AspNetCore.OpenLayerDemo
 
             });
 
+
+            //app.Use(async (ctx, next) =>
+            //{
+            //    if (ctx.Request.Query.ContainsKey("headless"))
+            //    {
+
+            //    }
+
+            //});
+
+
+
             app.UseStaticFiles();
             app.UseMvc();
         }

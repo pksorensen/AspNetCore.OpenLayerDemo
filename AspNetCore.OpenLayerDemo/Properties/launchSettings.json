@@ -17,7 +17,7 @@
     },
     "AspNetCore.OpenLayerDemo": {
       "commandName": "Project",
-      "launchBrowser": true,
+      "commandLineArgs": "--headless /demos/fjordbroen",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

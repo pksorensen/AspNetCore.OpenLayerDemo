@@ -34,10 +34,13 @@
 <body class="">
     <!-- koLayout : $data-->
     <script>
+        console.log("Page Load");
         require(["nprogress"], function (NProgress) {
             NProgress.configure({ minimum: 0.1 });
             NProgress.start();
-            require(["Demos/Fjordbroen"]);
+            require(["Demos/Fjordbroen"], function (){},  function(err){
+                console.log(err);
+            });
         });
     </script>
 </body>
