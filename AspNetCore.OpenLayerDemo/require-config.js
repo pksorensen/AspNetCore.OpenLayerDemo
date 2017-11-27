@@ -61,5 +61,15 @@ require.config({
             location: "/src/demos/fjordbroen",
             main: "index"
         },
+        {
+            name: "Demos/TrackUnit",
+            location: "/src/demos/TrackUnit",
+            main: "index"
+        },
+        {
+            name: "Demos/Hus",
+            location: "/src/demos/Hus",
+            main: "index"
+        },
     ]
 })

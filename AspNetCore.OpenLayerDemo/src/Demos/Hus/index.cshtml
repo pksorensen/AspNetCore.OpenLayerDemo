@@ -1,0 +1,48 @@
+﻿@page
+@inject Microsoft.AspNetCore.Hosting.IHostingEnvironment HostingEnvironment;
+
+@{
+    var file = System.IO.Path.Combine(HostingEnvironment.WebRootPath, "modules.json");
+    var modules = System.IO.File.Exists(file) ? System.IO.File.ReadAllText(file) : "[]";
+}
+
+
+<!DOCTYPE html>
+<html class="no-js">
+<head>
+    <script>document.documentElement.className = 'js';</script>
+
+    <title>DotNET DevOps WebPI Feeds</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../libs/nprogress/nprogress.css" />
+
+     
+    <script src="../libs/requirejs/require.js"></script>
+    <script>
+
+
+        @Html.Raw(System.IO.File.ReadAllText("require-config.js"))
+
+
+        require.config({
+            modules: @Html.Raw(modules)
+        });
+
+    </script>
+
+</head>
+<body class="">
+    <!-- koLayout : $data-->
+    <script>
+        console.log("Page Load");
+        require(["nprogress"], function (NProgress) {
+            NProgress.configure({ minimum: 0.1 });
+            NProgress.start();
+            require(["Demos/Hus"], function (){},  function(err){
+                console.log(err);
+            });
+        });
+    </script>
+</body>
+</html>
+
